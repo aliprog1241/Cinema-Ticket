@@ -4,6 +4,9 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.urls import reverse
 from django.db.models import Count
 from .models import Movie, Seat, Ticket
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+
 
 def list_movies(request):
     movies = Movie.objects.all()
@@ -39,3 +42,14 @@ def stats(request):
         .order_by('seat__number')
     )
     return JsonResponse({"stats": list(data)})
+
+def signup(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('list_movies')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/signup.html', {'form': form})
